@@ -6,4 +6,4 @@ with open(sys.argv[1],'r') as f:
 
 pt1 = [(b['longitude'],b['latitude']) for b in bikes]
 
-[(p[1],p[0],onzo_geo.bike_suburb(p)) for p in pt1]
+print([(p[1],p[0],onzo_geo.bike_suburb(p)) for p in pt1])
