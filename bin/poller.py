@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import requests
+import onzo_insert, mysql_onzo
 from datetime import datetime
 import json,sys,os
 from time import sleep
@@ -25,3 +26,20 @@ ofile = os.path.join(datadir,'..','data','onzo_%s.json' % datetime.now().strftim
 
 with open(ofile,'w') as f:
     f.write(r.content)
+
+# Attempting MySQL insert
+onzo_insert.onzo_insert(ofile)
+conn = mysql_onzo.onzo_connect()
+curs = conn.cursor()
+ins = r"""
+INSERT INTO onzo.bikes_suburbs 
+SELECT bl.*, sh.areaunit_id, sh.areaunit_name, sm.suburb 
+from bike_locations bl 
+LEFT JOIN area_unit_shapes sh 
+ON ST_CONTAINS(sh.shape, bl.position) LEFT JOIN submap sm 
+ON sm.areaunit = sh.areaunit_name where bl.datetime > (select max(datetime) from onzo.bikes_suburbs);
+"""
+curs.execute(ins)
+conn.commit()
+curs.close()
+conn.close()
